@@ -58,6 +58,7 @@
 
 #include "..\XATGFileWriter\XATGFileWriter.h"
 #include "..\SDKMeshFileWriter\SDKMeshFileWriter.h"
+#include "..\BMeshFileWriter\BMeshFileWriter.h"
 
 #define CONTENT_EXPORTER_TITLE CONTENT_EXPORTER_GLOBAL_TITLE " for FBX"
 extern CHAR g_strExporterName[100];

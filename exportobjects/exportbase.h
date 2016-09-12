@@ -47,8 +47,8 @@ protected:
 class ExportBase
 {
 public:
-    ExportBase() : m_pDCCObject(nullptr) {}
-    ExportBase( ExportString name ) : m_Name( name ), m_pDCCObject(nullptr) {}
+    ExportBase() : m_pDCCObject(nullptr), m_SkipExport(false) {}
+    ExportBase( ExportString name ) : m_Name( name ), m_pDCCObject(nullptr), m_SkipExport(false) {}
     virtual ~ExportBase();
 
     ExportString GetName() const { return m_Name; }
@@ -56,9 +56,14 @@ public:
 
     void SetDCCObject( void* pDCCObject ) { m_pDCCObject = pDCCObject; }
     void* GetDCCObject() const { return m_pDCCObject; }
+
+    bool ShouldSkipExport() const { return m_SkipExport; }
+    void SetSkipExport(bool SkipExport) { m_SkipExport = SkipExport; }
+
 protected:
     ExportString        m_Name;
     void*               m_pDCCObject;
+    bool				m_SkipExport;
 };
 
 };

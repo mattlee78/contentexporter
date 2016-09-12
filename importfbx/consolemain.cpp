@@ -89,6 +89,7 @@ enum ExportFileFormat
 {
     FILEFORMAT_XATG = 0,
     FILEFORMAT_SDKMESH = 1,
+    FILEFORMAT_BMESH = 2,
 };
 
 INT g_ExportFileFormat = FILEFORMAT_SDKMESH;
@@ -294,6 +295,12 @@ bool MacroSDKMesh( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
+bool MacroBMesh(const CHAR* strArgument, bool &bUsedArgument)
+{
+    g_ExportFileFormat = FILEFORMAT_BMESH;
+    return FALSE;
+}
+
 bool MacroXATG( const CHAR* strArgument, bool& bUsedArgument )
 {
     UNREFERENCED_PARAMETER(strArgument);
@@ -456,6 +463,7 @@ MacroCommand g_MacroCommands[] = {
     { "verbose", "", "Displays more detailed output, equivalent to -loglevel 4", MacroSetVerbose },
     { "xatg", "", "Use the XATG output file format, equivalent to -fileformat xatg", MacroXATG },
     { "sdkmesh", "", "Use the SDKMESH output file format, equivalent to -fileformat sdkmesh", MacroSDKMesh },
+    { "bmesh", "", "Use the BMESH output file format, equivalent to -fileformat bmesh", MacroBMesh },
     { "xbox360", "", "Sets export options for an Xbox 360 target", MacroXbox360 },
     { "windowsd3d9", "", "Sets export options for a Windows Direct3D 9 target", MacroWindowsD3D9 },
     { "windowsd3d10", "", "Sets export options for a Windows Direct3D 10 target", MacroWindowsD3D10 },
@@ -790,6 +798,10 @@ void BuildOutputFileName( const ExportPath& InputFileName )
     {
         g_CurrentOutputFileName.ChangeExtension( CONTENT_EXPORTER_BINARYFILE_EXTENSION );
     }
+    else if (g_ExportFileFormat == FILEFORMAT_BMESH)
+    {
+        g_CurrentOutputFileName.ChangeExtension(CONTENT_EXPORTER_NEWFILE_EXTENSION);
+    }
     else
     {
         g_CurrentOutputFileName.ChangeExtension( CONTENT_EXPORTER_FILE_EXTENSION );
@@ -829,6 +841,7 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
     static const ExportEnumValue FileFormatEnums[] = {
         { CONTENT_EXPORTER_FILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_FILE_EXTENSION, FILEFORMAT_XATG },
         { CONTENT_EXPORTER_BINARYFILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_BINARYFILE_EXTENSION, FILEFORMAT_SDKMESH },
+        { CONTENT_EXPORTER_NEWFILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_NEWFILE_EXTENSION, FILEFORMAT_BMESH },
     };
     g_SettingsManager.AddEnum( g_SettingsManager.GetRootCategory( 0 ), "Output File Format", "fileformat", FILEFORMAT_SDKMESH, FileFormatEnums, ARRAYSIZE( FileFormatEnums ), &g_ExportFileFormat );
 
@@ -916,6 +929,12 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
                 {
                     ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
                 }
+            }
+            else if (g_ExportFileFormat == FILEFORMAT_BMESH)
+            {
+                ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "", TRUE);
+                WriteBMeshFile(g_CurrentOutputFileName, &g_Manifest);
+                ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
             }
             else
             {

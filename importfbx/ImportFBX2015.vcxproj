@@ -258,6 +258,9 @@
     <ResourceCompile Include="ContentExporter.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BMeshFileWriter\BMeshFileWriter2015.vcxproj">
+      <Project>{f5d55385-667c-442d-8daf-8b58b7388d1b}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\DirectXMesh\DirectXMesh_Desktop_2015.vcxproj">
       <Project>{6857f086-f6fe-4150-9ed7-7446f1c1c220}</Project>
     </ProjectReference>

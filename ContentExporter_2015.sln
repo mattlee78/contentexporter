@@ -1,5 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2015
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImportFBX", "ImportFBX\ImportFBX2015.vcxproj", "{A831840E-93D9-48E4-866C-1F024B3D44FC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExportObjects", "ExportObjects\ExportObjects2015.vcxproj", "{6AFA24FB-37B3-49D3-9832-F7EA3DE3CA2E}"
@@ -12,7 +14,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTex", "DirectXTex\Di
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXMesh", "DirectXMesh\DirectXMesh_Desktop_2015.vcxproj", "{6857F086-F6FE-4150-9ED7-7446F1C1C220}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UVAtlas", "UVAtlas\UVAtlas_2015.vcxproj", "{10359E70-6A7F-4433-8EF1-B0FB688D830E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UVAtlas_2015", "UVAtlas\UVAtlas_2015.vcxproj", "{10359E70-6A7F-4433-8EF1-B0FB688D830E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BMeshFileWriter", "BMeshFileWriter\BMeshFileWriter2015.vcxproj", "{F5D55385-667C-442D-8DAF-8B58B7388D1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -120,6 +124,18 @@ Global
 		{10359E70-6A7F-4433-8EF1-B0FB688D830E}.Release|x64.ActiveCfg = Release|x64
 		{10359E70-6A7F-4433-8EF1-B0FB688D830E}.Release|x64.Build.0 = Release|x64
 		{10359E70-6A7F-4433-8EF1-B0FB688D830E}.Release|x64.Deploy.0 = Release|x64
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Debug|Win32.Build.0 = Debug|Win32
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Debug|x64.ActiveCfg = Debug|x64
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Debug|x64.Build.0 = Debug|x64
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Profile|Win32.ActiveCfg = Release|Win32
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Profile|Win32.Build.0 = Release|Win32
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Profile|x64.ActiveCfg = Release|x64
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Profile|x64.Build.0 = Release|x64
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Release|Win32.ActiveCfg = Release|Win32
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Release|Win32.Build.0 = Release|Win32
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Release|x64.ActiveCfg = Release|x64
+		{F5D55385-667C-442D-8DAF-8B58B7388D1B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
