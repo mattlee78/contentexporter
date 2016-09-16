@@ -298,7 +298,7 @@ bool MacroSDKMesh( const CHAR* strArgument, bool& bUsedArgument )
 bool MacroBMesh(const CHAR* strArgument, bool &bUsedArgument)
 {
     g_ExportFileFormat = FILEFORMAT_BMESH;
-    return FALSE;
+    return true;
 }
 
 bool MacroXATG( const CHAR* strArgument, bool& bUsedArgument )

@@ -51,8 +51,10 @@ namespace ATG
         UINT64 SizeBytes;
         UINT64 PositionBytes;
     };
-    std::vector<BufferSource> g_MeshBufferSources;
-    UINT64 g_CurrentMeshBufferSizeBytes = 0;
+    std::vector<BufferSource> g_VertexBufferSources;
+    UINT64 g_CurrentVertexBufferSizeBytes = 0;
+    std::vector<BufferSource> g_IndexBufferSources;
+    UINT64 g_CurrentIndexBufferSizeBytes = 0;
     std::vector<BufferSource> g_AnimBufferSources;
     UINT64 g_CurrentAnimBufferSizeBytes = 0;
 
@@ -61,9 +63,9 @@ namespace ATG
 
     BMESH_HEADER g_Header;
 
-    inline UINT64 CaptureBuffer( const VOID* pBytes, UINT64 SizeBytes, BOOL Anim )
+    inline UINT64 CaptureBuffer( const VOID* pBytes, UINT64 SizeBytes, BOOL Anim, BOOL IsVertex )
     {
-        UINT64 CurrentPos = Anim ? g_CurrentAnimBufferSizeBytes : g_CurrentMeshBufferSizeBytes;
+        UINT64 CurrentPos = Anim ? g_CurrentAnimBufferSizeBytes : (IsVertex ? g_CurrentVertexBufferSizeBytes : g_CurrentIndexBufferSizeBytes);
 
         BufferSource BS;
         BS.pBytes = pBytes;
@@ -75,10 +77,15 @@ namespace ATG
             g_AnimBufferSources.push_back( BS );
             g_CurrentAnimBufferSizeBytes += BS.SizeBytes;
         }
+        else if (IsVertex)
+        {
+            g_VertexBufferSources.push_back(BS);
+            g_CurrentVertexBufferSizeBytes += BS.SizeBytes;
+        }
         else
         {
-            g_MeshBufferSources.push_back( BS );
-            g_CurrentMeshBufferSizeBytes += BS.SizeBytes;
+            g_IndexBufferSources.push_back( BS );
+            g_CurrentIndexBufferSizeBytes += BS.SizeBytes;
         }
 
         return CurrentPos;
@@ -121,17 +128,17 @@ namespace ATG
         Name.SegmentOffsetBytes = CaptureString( strNameAnsi, strlen(strNameAnsi) + 1 );
     }
 
-    inline VOID CaptureByteArray( BMESH_ARRAY<BYTE>& ByteArray, const VOID* pBuffer, UINT64 BufferSizeBytes )
+    inline VOID CaptureByteArray( BMESH_ARRAY<BYTE>& ByteArray, const VOID* pBuffer, UINT64 BufferSizeBytes, BOOL IsVertex )
     {
         ByteArray.Count = BufferSizeBytes;
-        ByteArray.SegmentOffsetBytes = CaptureBuffer( pBuffer, BufferSizeBytes, FALSE );
+        ByteArray.SegmentOffsetBytes = CaptureBuffer( pBuffer, BufferSizeBytes, FALSE, IsVertex );
     }
 
     inline VOID CaptureFloatArray( BMESH_ARRAY<FLOAT>& FloatArray, const VOID* pBuffer, UINT64 BufferSizeBytes )
     {
         assert( ( BufferSizeBytes & 0x3 ) == 0 );
         FloatArray.Count = BufferSizeBytes / sizeof(FLOAT);
-        FloatArray.SegmentOffsetBytes = CaptureBuffer( pBuffer, BufferSizeBytes, TRUE );
+        FloatArray.SegmentOffsetBytes = CaptureBuffer( pBuffer, BufferSizeBytes, TRUE, FALSE );
     }
 
     inline UINT FindSubsetIndex( ExportMeshBase* pMesh, ExportString Name )
@@ -276,7 +283,7 @@ namespace ATG
         ZeroMemory( &VertexData, sizeof(VertexData) );
         VertexData.StrideBytes = pVB->GetVertexSize();
         VertexData.Count = pVB->GetVertexCount();
-        CaptureByteArray( VertexData.ByteBuffer, pVB->GetVertexData(), pVB->GetVertexDataSize() );
+        CaptureByteArray( VertexData.ByteBuffer, pVB->GetVertexData(), pVB->GetVertexDataSize(), TRUE );
 
         g_VertexDatas.push_back( VertexData );
 
@@ -406,7 +413,7 @@ namespace ATG
         if( pPolyMesh->GetIB() != NULL )
         {
             ExportIB* pIB = pPolyMesh->GetIB();
-            CaptureByteArray( Mesh.IndexData.ByteBuffer, pIB->GetIndexData(), pIB->GetIndexDataSize() );
+            CaptureByteArray( Mesh.IndexData.ByteBuffer, pIB->GetIndexData(), pIB->GetIndexDataSize(), FALSE );
             Mesh.IndexData.Format = pIB->GetIndexSize() == 2 ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
             Mesh.IndexData.Count = pIB->GetIndexCount();
         }
@@ -641,8 +648,10 @@ namespace ATG
         g_EncounteredMaterials.clear();
         g_EncounteredMeshes.clear();
 
-        g_MeshBufferSources.clear();
-        g_CurrentMeshBufferSizeBytes = 0;
+        g_VertexBufferSources.clear();
+        g_CurrentVertexBufferSizeBytes = 0;
+        g_IndexBufferSources.clear();
+        g_CurrentIndexBufferSizeBytes = 0;
         g_AnimBufferSources.clear();
         g_CurrentAnimBufferSizeBytes = 0;
 
@@ -668,6 +677,12 @@ namespace ATG
             CaptureAnimation( g_pScene->GetAnimation( i ) );
         }
 
+        for (UINT32 i = 0; i < g_Meshes.size(); ++i)
+        {
+            BMESH_MESH& mesh = g_Meshes[i];
+            mesh.IndexData.ByteBuffer.SegmentOffsetBytes += g_CurrentVertexBufferSizeBytes;
+        }
+
         UINT64 FrameSizeBytes = g_Frames.size() * sizeof(BMESH_FRAME);
         UINT64 SubsetSizeBytes = g_Subsets.size() * sizeof(BMESH_SUBSET);
         UINT64 VertexDataSizeBytes = g_VertexDatas.size() * sizeof(BMESH_VERTEXDATA);
@@ -684,7 +699,7 @@ namespace ATG
 
         g_Header.DataSegmentSizeBytes = DataSegmentSizeBytes;
         g_Header.StringsSizeBytes = g_CurrentStringSizeBytes;
-        g_Header.MeshBufferSegmentSizeBytes = g_CurrentMeshBufferSizeBytes;
+        g_Header.MeshBufferSegmentSizeBytes = g_CurrentVertexBufferSizeBytes + g_CurrentIndexBufferSizeBytes;
         g_Header.AnimBufferSegmentSizeBytes = g_CurrentAnimBufferSizeBytes;
 
         UINT64 DataSegmentOffsetBytes = 0;
@@ -796,10 +811,16 @@ namespace ATG
             WriteFile( hFile, g_AnimBufferSources[i].pBytes, g_AnimBufferSources[i].SizeBytes, &BytesWritten, NULL );
         }
 
-        BufferCount = (UINT)g_MeshBufferSources.size();
+        BufferCount = (UINT)g_VertexBufferSources.size();
         for( UINT i = 0; i < BufferCount; ++i )
         {
-            WriteFile( hFile, g_MeshBufferSources[i].pBytes, g_MeshBufferSources[i].SizeBytes, &BytesWritten, NULL );
+            WriteFile( hFile, g_VertexBufferSources[i].pBytes, g_VertexBufferSources[i].SizeBytes, &BytesWritten, NULL );
+        }
+
+        BufferCount = (UINT)g_IndexBufferSources.size();
+        for (UINT i = 0; i < BufferCount; ++i)
+        {
+            WriteFile(hFile, g_IndexBufferSources[i].pBytes, g_IndexBufferSources[i].SizeBytes, &BytesWritten, NULL);
         }
 
         CloseHandle( hFile );
