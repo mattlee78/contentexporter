@@ -445,6 +445,21 @@ namespace ATG
             g_MeshInfluences.push_back( Inf );
         }
 
+        if (pMesh->GetSmallestBound() == ExportMeshBase::AxisAlignedBoxBound)
+        {
+            Mesh.BoundingVolume.Type = BMESH_BOUNDINGVOLUME_AABB;
+            const DirectX::BoundingBox AABB = pMesh->GetBoundingAABB();
+            *(DirectX::XMFLOAT3*)&Mesh.BoundingVolume.Parameters[0] = AABB.Center;
+            *(DirectX::XMFLOAT3*)&Mesh.BoundingVolume.Parameters[3] = AABB.Extents;
+        }
+        else
+        {
+            Mesh.BoundingVolume.Type = BMESH_BOUNDINGVOLUME_SPHERE;
+            const DirectX::BoundingSphere Sphere = pMesh->GetBoundingSphere();
+            *(DirectX::XMFLOAT3*)&Mesh.BoundingVolume.Parameters[0] = Sphere.Center;
+            Mesh.BoundingVolume.Parameters[3] = Sphere.Radius;
+        }
+
         g_Meshes.push_back( Mesh );
         g_EncounteredMeshes.push_back( pMesh );
     }
